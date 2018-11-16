@@ -2,7 +2,7 @@
 
 > Snake is basically a web crawler put into a PyQt5 Framework. The software is completly > written by me. Just for fun to be honest with you. Normally people write documentation   for their software so this is my attempt. Just know the software is in early development.
 
-Snake has a build in text editor to make life easy. Slide like a snake through the data the internet offers and save it right away. Or as a text editor suggests edit your fetch!
+Snake has a build in text editor to make life easy. Slide with you buddy Python3.7 like a snake through the data the internet offers and save it right away. Or as a text editor suggests edit your fetch!
 
 ### Features 
 
