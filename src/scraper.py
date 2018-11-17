@@ -27,16 +27,6 @@ class WebCrawler(object):
             for url in urls:
                 self.links_found.append(url)
 
-        # try:
-            # with urllib.request.urlopen(self.url) as html_page:
-            #     soup = bs4(html_page, 'html.parser')
-            # for link in soup.findAll('a', attrs={'href': re.compile("^http://")}):
-            #     links.append(link.get('href'))
-            # return links
-        # except urllib.error.URLError:
-        #     print(f'ERROR LOADING URL: {url}')
-        #     return links
-
 class VersionCheck(object):
     def __init__(self, k, g, window):
         self.k = k
@@ -50,6 +40,9 @@ class VersionCheck(object):
         r = [i[8:].replace("'", "") for i in d if 'VAPI' in i]
         if r != []:
             r = binascii.unhexlify(r[0]).decode()
+            r = r.split(' | ')[0]
+            print(r)
+            print(k)
             if str(k) != str(r):
                 # Notify there is a update available
                 choice = QtWidgets.QMessageBox.question(
