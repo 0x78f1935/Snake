@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'D:\python_projecten\SCANSAT2\src\data\layouts\editor.ui'
+# Form implementation generated from reading ui file 'D:\python_projecten\Snake\src\data\layouts\editor.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #

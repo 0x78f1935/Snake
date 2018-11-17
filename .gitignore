@@ -218,3 +218,5 @@ _Pvt_Extensions
 
 # Custom path
 venv/
+*.ui
+__pycache__/

@@ -41,8 +41,6 @@ class VersionCheck(object):
         if r != []:
             r = binascii.unhexlify(r[0]).decode()
             r = r.split(' | ')[0]
-            print(r)
-            print(k)
             if str(k) != str(r):
                 # Notify there is a update available
                 choice = QtWidgets.QMessageBox.question(
