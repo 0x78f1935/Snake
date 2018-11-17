@@ -220,3 +220,4 @@ _Pvt_Extensions
 venv/
 *.ui
 __pycache__/
+.vscode

@@ -214,10 +214,16 @@ class Window(QMainWindow):
                 for item in crawler.data:
                     crawler.search(item)
                 
+
+                
                 links_found = list(sorted(set(crawler.links_found)))
                 if len(links_found) > 0:
                     tmpOverview[url] = list(sorted(set(crawler.links_found)))
                     overview.append(tmpOverview)
+                
+                # Release some memory
+                crawlerThread.stop()
+                del crawlerThread
             
             output = []
             for item in overview:
@@ -228,9 +234,6 @@ class Window(QMainWindow):
             self.scraper.textBrowser.setText(result)  # refresh the screen with new information
             self.scraper.progressBar.setValue(100)  # Put the progressbar at 100% when finished
             self.history = result
-            # Release some memory
-            crawlerThread.stop()
-            del crawlerThread
 
     def close_application(self):
         """Closes application"""
