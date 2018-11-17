@@ -24,7 +24,7 @@
 > Do not be foolish and download malware.
 
 ### Future
-The future is very bright for this program. I got a couple ideas which I like to try out and implement this in Snake. When I'm done, I expect to have developed a great toolbox which contains tools to make everyday tasks just a slightly more easy/enjoyable.
+The future is very bright for this program. I got a couple of ideas which I like to try out and implement this in Snake. When I'm done, I expect to have developed a great toolbox which contains tools to make everyday tasks just a slightly more easy/enjoyable.
 
 ### Contribution
 Ideas and requests are greatly appreciated. If you have any ideas please feel free to use the template "feature_request_template" provided in the **documentation** folder
@@ -32,5 +32,16 @@ Ideas and requests are greatly appreciated. If you have any ideas please feel fr
 ### Bugs
 Like wise Contribution there is a bug template available in the **documentation** folder. Feel free to create a ticket with your problem or contribute to solve the issue. Don't forget to make a pull request!
 
-
-
+## Installation
+Make sure you have python3.7 installed. **This program will not work on python 3.6 <**. How ever you like to use python, I like to create a virtual env. I suspect you know what you are doing. So here we go. I always put my virtualenv in the project folder and call it venv. You can call it however you like.
+```
+virtualenv venv
+```
+After this is done make sure you have your virtual env **activated**. Install the **requirements.txt**.
+```
+python -m pip install -r requirements.txt
+```
+After this you are all set!, Start **Snake** with the following command:
+```
+python main.py
+```
