@@ -9,6 +9,29 @@ from src.scraper import WebCrawler, VersionCheck
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QApplication
+import threading, re, queue
+
+class ThreadWithReturnValue(threading.Thread):
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs={}, Verbose=None):
+        threading.Thread.__init__(self, group, target, name, args, kwargs)
+        self._return = None
+        self._stop_event = threading.Event()
+
+    def run(self):
+        print(type(self._target))
+        if self._target is not None:
+            self._return = self._target(*self._args,
+                                                **self._kwargs)
+    def join(self, *args):
+        threading.Thread.join(self, *args)
+        return self._return
+
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
 
 class Window(QMainWindow):
     def __init__(self, first_time=True):
@@ -115,18 +138,99 @@ class Window(QMainWindow):
         else:
             protocol = 'http://'
         url = protocol + str(url)
-        crawler = WebCrawler(url=url, protocol=protocol)
-        total = 0
-        progress = int(int(len(crawler.data)) // 100)
-        for item in crawler.data:
-            crawler.search(item)
-            total += progress
-            print(self.scraper.progressBar.value)
-            result = "\n".join(crawler.links_found)
-            self.scraper.textBrowser.setText(result)
-            self.scraper.progressBar.setValue(total)
-        self.history = result
-        self.scraper.progressBar.setValue(100)
+        crawlerThread = ThreadWithReturnValue(target=WebCrawler, args=(url, protocol,))
+        crawlerThread.start()
+        crawler = crawlerThread.join()  # Fetch results from thread
+        warning_msg = """
+            I'm fully aware the program will freeze any moment now.\n
+            Please be aware and have patients. Snake is still running in the background.\n
+            -----------------\n
+            """
+        # crawler = WebCrawler(url=url, protocol=protocol)
+        if crawler.data[0].startswith('No search result'):
+            self.scraper.textBrowser.setText(crawler.data[0])
+            self.scraper.progressBar.setValue(50)
+        else:
+            total = 0 # Percentage of loading bar
+            progress = int(int(len(crawler.data) // 2) // 100)# First section of the loading bar should go until 50 %
+            for item in crawler.data: # For each line in the raw source code
+                crawler.search(item) # Search for a link
+                total += progress # Update the progress bar
+                result = "\n".join(crawler.links_found) # Append result to the other results
+                self.scraper.textBrowser.setText(warning_msg) # refresh the screen with new information
+                self.scraper.progressBar.setValue(total) # Update the progress bar
+            self.history = result # Loop ended so we put the final version in our history
+            self.scraper.progressBar.setValue(50)  # Put the progressbar at 50% when finished
+            
+            check_again = [] # This list is going for the second time through the scraper
+            without_base_url = []  # This list contains no base urls
+            with_base_urls = []  # This list contains base urls
+            not_sure = []  # List which include urls we simply not sure about
+            
+            while len(crawler.links_found): # Keep the loop going aslong there are items in the class
+                item = crawler.links_found.pop(0) # pop the first item
+                if item.startswith('http'): # Check if it starts with http
+                    if len(re.findall(r"\b" + self.scraper.lineEdit.text() + r"\b", item)) > 0: # check if the host url is in there
+                        check_again.append(item) # Worth checking again anyways since it starts with a protocol
+                        with_base_urls.append(item) # TODO add button for strict search which only allow to search again in this list
+                    else:
+                        not_sure.append(item) # Not sure what TODO with this..
+                elif item.startswith('/'): # If the link starts with a trailing slash its 99% change a extension on the website, worth looking for
+                    without_base_url.append(item)  # Just for sort reasons, to keep it clean
+                    if url.endswith('/'):
+                        url = url[:int(len(url)-1)]
+                    item = url + item # create a possible working link
+                    check_again.append(item) # Definitly check this new link
+            info = (
+                f"Items are sorted, Found the following items:\n"
+                f"New target pages: {len(check_again)}\n"
+                f"Without base url: {len(without_base_url)}\n"
+                f"With http base url: {len(with_base_urls)}\n"
+                f"Not sure: {len(not_sure)}"
+                )
+                
+            # Release some memory
+            crawlerThread.stop()
+            del crawlerThread
+
+            warning_msg = warning_msg + info
+            self.scraper.textBrowser.setText(warning_msg)  # refresh the screen with new information
+            
+            # Second run!
+            tmpOverview = {}  # Final result
+            overview = []
+
+            for url in check_again:  # For each url we want to check again
+                # Check protocol type
+                protocol = url.split('://')
+                if protocol[0] == 'http':
+                    protocol = 'http'
+                elif protocol[0] == 'https':
+                    protocol = 'https'
+                # Start new thread
+                crawlerThread = ThreadWithReturnValue(target=WebCrawler, args=(url, protocol,))
+                crawlerThread.start()
+                crawler = crawlerThread.join()  # Fetch results from thread
+                for item in crawler.data:
+                    crawler.search(item)
+                
+                links_found = list(sorted(set(crawler.links_found)))
+                if len(links_found) > 0:
+                    tmpOverview[url] = list(sorted(set(crawler.links_found)))
+                    overview.append(tmpOverview)
+            
+            output = []
+            for item in overview:
+                for key, value in item.items():
+                    output.append("{}: {}\n".format(key, '\n\tL _ _ _ '.join(value)))
+
+            result = '\n'.join(output)
+            self.scraper.textBrowser.setText(result)  # refresh the screen with new information
+            self.scraper.progressBar.setValue(100)  # Put the progressbar at 100% when finished
+            self.history = result
+            # Release some memory
+            crawlerThread.stop()
+            del crawlerThread
 
     def close_application(self):
         """Closes application"""
