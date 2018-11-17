@@ -14,8 +14,11 @@ class WebCrawler(object):
 
     def fetchData(self):
         """Fetches raw data and puts it in a list"""
-        http = urllib3.PoolManager() # Seems like urllib3 doesnt care about https
-        response = http.request('GET', self.url) # Request url
+        http = urllib3.PoolManager()  # Seems like urllib3 doesnt care about https
+        try:
+            response = http.request('GET', self.url)  # Request url
+        except urllib3.exceptions.MaxRetryError:
+            return f'No search result found on: {self.url}'
         soup = bs4(response.data.decode('utf-8'), 'html.parser') # Fetch raw source code
         data = str(soup).split('\n')
         return data

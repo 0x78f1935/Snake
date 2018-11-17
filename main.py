@@ -116,17 +116,21 @@ class Window(QMainWindow):
             protocol = 'http://'
         url = protocol + str(url)
         crawler = WebCrawler(url=url, protocol=protocol)
-        total = 0
-        progress = int(int(len(crawler.data)) // 100)
-        for item in crawler.data:
-            crawler.search(item)
-            total += progress
-            print(self.scraper.progressBar.value)
-            result = "\n".join(crawler.links_found)
-            self.scraper.textBrowser.setText(result)
-            self.scraper.progressBar.setValue(total)
-        self.history = result
-        self.scraper.progressBar.setValue(100)
+        if crawler.data.startswith('No search result'):
+            self.scraper.textBrowser.setText(crawler.data)
+            self.scraper.progressBar.setValue(100)
+        else:
+            total = 0
+            progress = int(int(len(crawler.data)) // 100)
+            for item in crawler.data:
+                crawler.search(item)
+                total += progress
+                print(self.scraper.progressBar.value)
+                result = "\n".join(crawler.links_found)
+                self.scraper.textBrowser.setText(result)
+                self.scraper.progressBar.setValue(total)
+            self.history = result
+            self.scraper.progressBar.setValue(100)
 
     def close_application(self):
         """Closes application"""
