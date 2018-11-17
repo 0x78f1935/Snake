@@ -11,8 +11,8 @@
 > Build in Snake is a quick and simple text editor. You are able to copy the output of for example the scraper and paste it directly into your editor.
 - Save/Load file
 > A editor is not a editor if its not able to save and open files.
-- Fetch hyperlinks across webservers.
-> webservers may contain valuable data such as scripts or maybe links to unsecure admin pages, who knows. This function searches for navigatable links on a single page.
+- Scraper
+> Fetch hyperlinks across webservers. webservers may contain valuable data such as scripts or maybe links to unsecure admin pages, who knows. This function searches for navigatable links on a single page. The links found on the page are getting sorted out and run through the scraper once more. With a little bit of magic and a bit of believe this will be your output.
 
 ###### Settings
 - Change the font of the program.
