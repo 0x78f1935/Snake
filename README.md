@@ -7,24 +7,29 @@
 ### Features 
 
 ###### Tools
-- Editor
+> - Editor
+> \
 > Build in Snake is a quick and simple text editor. You are able to copy the output of for example the scraper and paste it directly into your editor.
-- Save/Load file
+> - Save/Load file
+> \
 > A editor is not a editor if its not able to save and open files.
-- Scraper
+> - Scraper
+> \
 > Fetch hyperlinks across webservers. webservers may contain valuable data such as scripts or maybe links to unsecure admin pages, who knows. This function searches for navigatable links on a single page. The links found on the page are getting sorted out and run through the scraper once more. With a little bit of magic and a bit of believe a clean ordered output rolls out.
 
 ###### Settings
-- Change the font of the program.
+> - Change the font of the program.
+> \
 > You have the possibility to change the font of the program. Increase the size of the font or even change the color!
-- Window Style
+> - Window Style
+> \
 > Along the years we had a hand full of styles we could choose from on a system. This changed your theme of your computer to your personal preferences.You can choose between any style available on your machine.
 
 ###### New Updates
 > Snake lets you know when there is a new version available to download. Because this is a opensource project, there will be a chance someone uses my code which is fine by me but because this feature is implemented, I want you to know that I (the creator) only upload at:
-- https://github.com/Annihilator708/Snake
-- https://www.codewars.nl/
-
+> - https://github.com/Annihilator708/Snake
+> - https://www.codewars.nl/
+>
 > Do not be foolish and download malware.
 
 ### Future
@@ -49,3 +54,5 @@ After this you are all set!, Start **Snake** with the following command:
 ```
 python main.py
 ```
+
+> ##### More documentation? [Yes, you rock!](https://github.com/Annihilator708/Snake/blob/master/.github/Documentation/DOCUMENTATION.md)
