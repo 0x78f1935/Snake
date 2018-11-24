@@ -55,4 +55,4 @@ After this you are all set!, Start **Snake** with the following command:
 python main.py
 ```
 
-> ##### More documentation? [Yes, you rock!](https://github.com/Annihilator708/Snake/blob/master/.github/Documentation/DOCUMENTATION.md)
+> ##### More documentation? [Yes, you rock!](https://github.com/Annihilator708/Snake/blob/master/.github/Documentation/DOCUMENTATION.MD)
