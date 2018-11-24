@@ -1,84 +1,58 @@
 from bs4 import BeautifulSoup as bs4
-from PyQt5 import QtGui, QtCore, QtWidgets
-import urllib3
-import binascii
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+
+import random
+import asyncio
+import aiohttp
 import re
-from multiprocessing.pool import ThreadPool
-import threading
 
-def threaded(f, daemon=False):
-    import Queue
-
-    def wrapped_f(q, *args, **kwargs):
-        '''this function calls the decorated function and puts the 
-        result in a queue'''
-        ret = f(*args, **kwargs)
-        q.put(ret)
-
-    def wrap(*args, **kwargs):
-        '''this is the function returned from the decorator. It fires off
-        wrapped_f in a new thread and returns the thread object with
-        the result queue attached'''
-
-        q = Queue.Queue()
-
-        t = threading.Thread(target=wrapped_f, args=(q,)+args, kwargs=kwargs)
-        t.daemon = daemon
-        t.start()
-        t.result_queue = q        
-        return t
-
-    return wrap
 
 class WebCrawler(object):
-    def __init__(self, url, protocol):
-        self.url = url
-        print(self.url)
-        self.protocol = protocol
-        self.data = self.fetchData()
-        self.links_found = []
-        
-    def fetchData(self):
-        """Fetches raw data and puts it in a list"""
-        http = urllib3.PoolManager()  # Seems like urllib3 doesnt care about https
-        try:
-            response = http.request('GET', self.url)  # Request url
-        except urllib3.exceptions.MaxRetryError:
-            return [f'No search result found on: {self.url}']
-        try:
-            soup = bs4(response.data.decode('utf-8').strip(), 'html.parser')  # Fetch raw source code
-        except UnicodeDecodeError:
-            return [f'Could not decode: {self.url}']
-        data = str(soup).split('\n')
-        return data
+    def __init__(self):
+        self.loop = asyncio.get_event_loop()
 
-    def search(self, data: str):
+    async def search(self, data: str):
         """ Searches in the fetched data for hyperlinks append them to links_found"""
-        urls = re.findall(r'href=[\'"]?([^\'" >]+)', data)
+        links_found = []
+        urls = re.findall(r'href=[\'"]?([^\'" >]+)', str(data))
         if urls != []:
             for url in urls:
-                self.links_found.append(url)
+                links_found.append(url)
+            return links_found
+        else:
+            return []
+        
+    async def fetchData(self, url):
+        """Fetches raw data and puts it in a list"""
+        desktop_agents = ['Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14',
+                 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36',
+                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36',
+                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0']
 
-class VersionCheck(object):
-    def __init__(self, k, g, window):
-        self.k = k
-        self.g = g
-        self.wc = WebCrawler(self.g, 'http')
-        self.window = window
-
-    def check(self):
-        d = self.wc.fetchData()
-        k = self.k.split(' | ')[0]
-        r = [i[8:].replace("'", "") for i in d if 'VAPI' in i]
-        if r != []:
-            r = binascii.unhexlify(r[0]).decode()
-            r = r.split(' | ')[0]
-            if str(k) != str(r):
-                # Notify there is a update available
-                choice = QtWidgets.QMessageBox.question(
-                    self.window,
-                    "Update!?", "There is a new version available.\nhttps://github.com/Annihilator708/Snake",
-                    QtWidgets.QMessageBox.Ok
-                )
-                if choice == QtWidgets.QMessageBox.Ok:
-                    print("You really should update")
+        if url.startswith('https://') or url.startswith('http://'):
+            timeout = aiohttp.ClientTimeout(total=1)
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
+                print(url)
+                try:
+                    async with session.get(url, timeout=timeout, headers={'User-agent' : random.choice(desktop_agents)}) as response:
+                        response = await response.read()
+                        try:
+                            soup = bs4(response.decode().strip(), 'html.parser')  # Fetch raw source code
+                        except UnicodeDecodeError:
+                            return ['Could not decode: {}'.format(url)]
+                        data = str(soup).split('\n')
+                        return await self.search(data)
+                except aiohttp.client_exceptions.ClientConnectorError:
+                    return []
+                except asyncio.TimeoutError:
+                    return []
+        else:
+            return []

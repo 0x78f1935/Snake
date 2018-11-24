@@ -4,24 +4,46 @@
 
 "Snake" has a build in text editor to make life easy. Slide with you buddy "Python3.7" like a snake through the data the internet offers and save it right away to your system. Or as a text editor suggests edit your fetch!
 
+## THANKSGIVING UPDATE
+
 ### What is New 
 
-- Scraper advanced search
-> The scraper part of snake is now optimized with regex and collect big chunks of data. How bigger the site how bigger the chance on a application freeze. This is something i have to look into for in the future.
-- Output results
+> - Scraper advanced search
+> \
+> The scraper part of snake is now optimized with regex and collect big chunks of data. 
+> - Output results
+> \
 > Each result has a tree structure. This way you are able to have a quick overview what links are available to you.
-- Multithreading
-> I'm not sure yet how to tackle the freezing problem, the code behind it keeps running so its not a big problem. Its the GUI that freezes. Perhaps this is my  future solution.
+> \
+> - Multithreading
+> \
+> Processes are way faster now. Big websites may still result in a freeze. 
+> 
+> ###### The gui had a major update aswell. New options have been added.
+> - new version warning
+> - Spider fetch
+> - Target only
+> - Total hits
+> - Toolbar
+> - Header menu
+>
+> Version 0.1.0 introduces a more advanced fetch to optimize results.
+> \
+> Refer to [documentation](https://github.com/Annihilator708/Snake/blob/master/.github/Documentation/DOCUMENTATION.md) for more information
 
 ### Fixes
-- TimeoutError
+> - TimeoutError
+> \
 > Fixed a timeout error when a invalid link was used.
+> - Unclosed threads
+> \
+> Fixed a issue where the threads did not close
 
 ###### New Updates
 > Snake lets you know when there is a new version available to download. Because this is a opensource project, there will be a chance someone uses my code which is fine by me but because this feature is implemented, I want you to know that I (the creator) only upload at:
-- https://github.com/Annihilator708/Snake
-- https://www.codewars.nl/
-
+>- https://github.com/Annihilator708/Snake
+>- https://www.codewars.nl/
+>
 > Do not be foolish and download malware.
 
 ### Contribution
