@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from src.data.layouts.gui import Ui_MainWindow as GUI
 from src.scraper import WebCrawler
 from src.extension import VersionCheck
+from src.codecs import Codecs
 from src.SETTINGS import *
 
 import concurrent.futures
@@ -51,6 +52,11 @@ class MainWindow(QMainWindow, GUI):
             self.advancedSearch.stateChanged.connect(self.trigger_spider)
             self.targetOnly.stateChanged.connect(self.trigger_targetOnly)
 
+            # Codecs
+            self.codecs = Codecs(self)
+            self.pushDecode.clicked.connect(self.codecs.decodeString)
+            self.codecs2editor.clicked.connect(self.copyCodecs2Editor)
+
             # Preferences
             self.pushFont.clicked.connect(self.font_choice)
             # Fetch style options
@@ -59,10 +65,14 @@ class MainWindow(QMainWindow, GUI):
                 self.pushStyle.addItem(i)
             self.pushStyle.activated[str].connect(self.style_choice)
 
-            # Render
-            self.show()
-            # Fetch url
-            self.url = self.scraper_input.text()
+        # Codecs
+        self.codecs.decodeString()
+        # Fetch url
+        self.url = self.scraper_input.text()
+        # Render
+        self.show()
+
+
 
     def file_open(self):
         """Tries to open the file into the text editor"""
@@ -186,6 +196,10 @@ class MainWindow(QMainWindow, GUI):
 
     def scraper2editor(self):
         self.textEdit.setText(self.history)
+        self.tabWidget.setCurrentIndex(0)
+    
+    def copyCodecs2Editor(self):
+        self.textEdit.setText(self.codecs.results)
         self.tabWidget.setCurrentIndex(0)
     
     def trigger_spider(self):
