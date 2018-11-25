@@ -8,36 +8,11 @@
 
 ### What is New 
 
-> - Scraper advanced search
+> - Codecs tab
 > \
-> The scraper part of snake is now optimized with regex and collect big chunks of data. 
-> - Output results
-> \
-> Each result has a tree structure. This way you are able to have a quick overview what links are available to you.
-> \
-> - Multithreading
-> \
-> Processes are way faster now. Big websites may still result in a freeze. 
-> 
-> ###### The gui had a major update aswell. New options have been added.
-> - new version warning
-> - Spider fetch
-> - Target only
-> - Total hits
-> - Toolbar
-> - Header menu
+> A new tab which decodes strings for you. Currently base64 and ROT13 supported
 >
-> Version 0.1.0 introduces a more advanced fetch to optimize results.
-> \
 > Refer to [documentation](https://github.com/Annihilator708/Snake/blob/master/.github/Documentation/DOCUMENTATION.md) for more information
-
-### Fixes
-> - TimeoutError
-> \
-> Fixed a timeout error when a invalid link was used.
-> - Unclosed threads
-> \
-> Fixed a issue where the threads did not close
 
 ###### New Updates
 > Snake lets you know when there is a new version available to download. Because this is a opensource project, there will be a chance someone uses my code which is fine by me but because this feature is implemented, I want you to know that I (the creator) only upload at:
