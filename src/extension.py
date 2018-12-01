@@ -35,7 +35,11 @@ class VersionCheck(object):
     def check(self):
         """recent | current"""
         d = self._fetchData()
-        r = [self._hode(i[8:].replace("'", "")) for i in d if 'VAPI' in i][0].split('|')
+        try:
+            r = [self._hode(i[8:].replace("'", "")) for i in d if 'VAPI' in i][0].split('|')
+        except IndexError:  # If index error is raised most likley there is no internet connection
+            print('Could not connect to the internet')
+            return
         self.r_v, r_a = r
         self.c_v, c_a = self._hode(VAPI).split('|')
         if self.c_v != self.r_v:
