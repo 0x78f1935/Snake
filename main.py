@@ -1,6 +1,7 @@
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from queue import Queue
 
 from src.data.layouts.gui import Ui_MainWindow as GUI
 from src.scraper import WebCrawler
@@ -10,6 +11,7 @@ from src.SETTINGS import *
 
 import concurrent.futures
 import multiprocessing
+import threading
 import asyncio
 import sys
 
@@ -25,13 +27,16 @@ class MainWindow(QMainWindow, GUI):
             self.setupUi(self)
             self.setWindowIcon(QIcon('src/data/app.png'))  # Set icon along the title
 
+
+            # Initialize Queue for multithreading purpose
+            self.queue = Queue()
+            self.scraper = WebCrawler(self.queue)  # Initalize Scraper
+
             # Check version
             self.vcheck = VersionCheck(self)
             self.vcheck.check()
 
-            # Initialize others
-            self.loop = asyncio.get_event_loop() # Make event async with this loop
-            self.scraper = WebCrawler()  # Initalize Scraper
+            # Initialize GUI variables
             self.initialRun = False
             self.SPIDER = False
             self.TARGETONLY = False
@@ -126,45 +131,51 @@ class MainWindow(QMainWindow, GUI):
             print("I knew you liked me <3")
             pass
         
-    def scraper_pool(self, data, total_percentage):
-        total_hits = len(data) # Total links gound, GUI stuff
-        percentage = float(len(data) / 100) / 3  # GUI stuff
-        # - SPIDER LOGIC
-        placeholder = {}
-        for url in data:
-            if self.TARGETONLY:
-                url = str(url).format('https://', '').format('http://', '')
-                print(url)
-                if str(url) in self.url:
-                    # For each result on the last page check again for more links
-                    page_result = self.loop.run_until_complete(self.scraper.fetchData(url))
-                    placeholder[url] = sorted(list(set(page_result)))  # Store the found data tempory in a placeholder
-                    total_hits += len(page_result)
-            else:
-                page_result = self.loop.run_until_complete(self.scraper.fetchData(url))
-                placeholder[url] = sorted(list(set(page_result)))  # Store the found data tempory in a placeholder
-                total_hits += len(page_result)
-
-            # Update GUI information
-            total_percentage += percentage
-            self.scraper_progress.setValue(total_percentage)
-            self.scraper_display.display(total_hits)
-        return placeholder
-
     def run_scraper(self):
         # - SCRAPER LOGIC
         results = [] # Final results will be stored here
         # Clear text display and send user a no response warning
         self.scraper_textDisplay.setText(self.vcheck._hode(WAPI))
-        self.url = self.scraper_input.text() # Get the user input
-        data = self.loop.run_until_complete(self.scraper.fetchData(self.url))  # Get all links on the user selected page
+        self.url = self.scraper_input.text()  # Get the user input
+
+        self.thread_scraper_args = (self.url,)
+        self.thread_scraper = threading.Thread(target=self.scraper.run, args=self.thread_scraper_args)
+        self.thread_scraper.start()
+        self.thread_scraper.join()
+        data = self.queue.get()        # Get all links on the user selected page
+
+        
+
         # - GUI LOGIC
-        total_percentage = 0 # GUI stuff
+        total_percentage = 0  # GUI stuff
+        total_hits = len(data) # Total links gound, GUI stuff
+        percentage = float(len(data) / 100) / 3  # GUI stuff
         self.scraper_progress.setValue(total_percentage) # GUI stuff
+        self.scraper_display.display(total_hits)
 
         # If spider is toggled on, execute advanced search
         if self.SPIDER:
-            placeholder = self.scraper_pool(data, total_percentage)
+            placeholder = {}
+            for url in data:
+                total_percentage += percentage  # GUI stuff
+                self.scraper_progress.setValue(total_percentage) # GUI stuff
+                placeholder[url] = []
+                self.thread_scraper_args = (url,)
+                # Somehow i'm not able to just update the self.thread_scraper.args to self.thread_scraper_args without issue.
+                # This is why a new thread is created. however this doesnt work like I want to.
+                self.thread_scraper = threading.Thread(target=self.scraper.run, args=self.thread_scraper_args) 
+                self.thread_scraper.start() # Start thread
+                self.thread_scraper.join()  # lock thread
+                data = self.queue.get()  # Get all links on the user selected page
+                total_hits += len(data)
+                self.scraper_display.display(total_hits)
+
+                if not self.thread_scraper._is_stopped:
+                    self.thread_scraper._stop()
+
+                for i in data:
+                    placeholder[url].append(i)
+            
             # Update progressbar to 100% after format loop, but set the var already
             total_percentage = 100
             # Format our fetched data to display
@@ -184,7 +195,6 @@ class MainWindow(QMainWindow, GUI):
         else:
             results = data
             total_percentage = 100
-            self.scraper_progress.setValue(total_percentage)
             self.scraper_display.display(len(results))
         
         final_format = '\n----\n'.join(sorted(results))
@@ -223,13 +233,6 @@ class MainWindow(QMainWindow, GUI):
 
 
 if __name__ == '__main__':
-    pool = multiprocessing.Pool(processes=4)
-    app = QApplication([])
-    try:
-        pool.map(
-            MainWindow(),
-            app.exec_()
-        )
-    except TypeError: # Expect TypeError when clicking X in the top right corner
-        pass
-    pool.close()
+    app = QApplication(sys.argv)
+    GUI = MainWindow()
+    sys.exit(app.exec_())
